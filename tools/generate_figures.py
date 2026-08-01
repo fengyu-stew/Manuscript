@@ -50,6 +50,11 @@ def arrow(ax, x1, y1, x2, y2, color="#555555", lw=1.0):
 def arrow_down(ax, x, y1, y2, color="#555555", lw=1.0):
     arrow(ax, x, y1, x, y2, color, lw)
 
+def bi_arrow(ax, x1, y1, x2, y2, color="#555555", lw=1.0):
+    """双向箭头"""
+    ax.annotate("", xy=(x2, y2), xytext=(x1, y1),
+                arrowprops=dict(arrowstyle="<->", color=color, lw=lw, connectionstyle="arc3,rad=0"))
+
 
 def arrow_right(ax, x1, x2, y, color="#555555", lw=1.0):
     arrow(ax, x1, y, x2, y, color, lw)
@@ -116,8 +121,8 @@ def fig_9_2():
         ("事件流", "（EVTF v2+JSON，离散触发，单向）",
          4.5, "#E1F5FE", "L→R",
          [("算法\n模块", 1.2), ("证据\n编码", 4.5), ("USB Bridge\n发送队列", 7.8), ("USB-Serial\nTX", 11.5)]),
-        ("控制流", "（JSON指令，双向，低带宽，←→）",
-         1.5, "#FCE4EC", "R→L",
+        ("控制流", "（JSON指令，双向←→，低带宽）",
+         1.5, "#FCE4EC", "R↔L",
          [("USB-Serial\nRX", 11.5), ("指令\n解析", 8.0), ("模块\n配置", 4.5), ("状态\n查询", 1.2)]),
     ]
 
@@ -131,15 +136,19 @@ def fig_9_2():
 
         # 画模块间箭头
         xs = [p[1] for p in nodes]
+        is_bidi = (direction == "R↔L")
         for i in range(len(xs) - 1):
-            if direction == "L→R":
-                # 左→右：前一个框的右边 → 后一个框的左边
+            if is_bidi:
+                # 双向箭头：控制流
+                bi_arrow(ax, xs[i] - 0.05, ch_y + 0.5, xs[i+1] + 2.05, ch_y + 0.5, "#666", 0.9)
+            elif direction == "L→R":
                 x_from = xs[i] + 2.05
                 x_to = xs[i+1] - 0.05
-            else:  # R→L：前一个框的左边 → 后一个框的右边
+                arrow(ax, x_from, ch_y + 0.5, x_to, ch_y + 0.5, "#666", 0.9)
+            else:  # R→L 单向
                 x_from = xs[i] - 0.05
                 x_to = xs[i+1] + 2.05
-            arrow(ax, x_from, ch_y + 0.5, x_to, ch_y + 0.5, "#666", 0.9)
+                arrow(ax, x_from, ch_y + 0.5, x_to, ch_y + 0.5, "#666", 0.9)
 
     save(fig, "fig_9_2.png")
 

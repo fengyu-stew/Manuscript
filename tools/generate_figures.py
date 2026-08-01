@@ -56,7 +56,7 @@ def arrow_right(ax, x1, x2, y, color="#555555", lw=1.0):
 
 
 # ============================================================
-# 图9-1 功能层次对比 — 保持良好，微调
+# 图9-1 功能层次对比 — 还原v1版本（带层间箭头标注）
 # ============================================================
 def fig_9_1():
     fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(13, 6))
@@ -65,27 +65,31 @@ def fig_9_1():
     # 左侧
     ax_l.set_xlim(0, 10); ax_l.set_ylim(0, 12); ax_l.axis("off")
     ax_l.set_title("传统MCU终端", fontsize=11, weight="bold", pad=6)
-    items_l = [("感知层", 9.2, "#FADBD8"), ("控制层\n（固化逻辑）", 6.6, "#F5B7B1"), ("执行层", 4.0, "#F1948A")]
-    for txt, y, c in items_l:
-        box(ax_l, 1.5, y, 7, 1.3, txt, color=c, fontsize=10, bold=True)
-    arrow_down(ax_l, 5, 8.0, 7.9, "#999", 1.0)
-    arrow_down(ax_l, 5, 5.4, 5.3, "#999", 1.0)
+    # v1 原版：层间有箭头文字标注
+    box(ax_l, 1.5, 9, 7, 1.3, "感知层", color="#F1948A", fontsize=10, bold=True)
+    ax_l.text(5, 8.2, "↓ 模拟信号", ha="center", fontsize=8, color="#555")
+    arrow_down(ax_l, 5, 7.9, 7.2, "#999", 0.8)
+    box(ax_l, 1.5, 6, 7, 1.3, "控制层\n（固化逻辑）", color="#F5B7B1", fontsize=10, bold=True)
+    ax_l.text(5, 5.2, "↓ 控制信号", ha="center", fontsize=8, color="#555")
+    arrow_down(ax_l, 5, 4.9, 4.2, "#999", 0.8)
+    box(ax_l, 1.5, 3.2, 7, 1.3, "执行层", color="#F1948A", fontsize=10, bold=True)
     ax_l.text(5, 1.6, "单向、固化控制流", ha="center", fontsize=9, color="gray", style="italic")
 
     # 右侧
     ax_r.set_xlim(0, 10); ax_r.set_ylim(0, 12); ax_r.axis("off")
     ax_r.set_title("智能嵌入式系统", fontsize=11, weight="bold", pad=6)
-    items_r = [
+    right_items = [
         ("感知层（多传感器融合）", 9.5, "#D5F5E3"),
         ("预处理层（降采样、滤波）", 7.7, "#ABEBC6"),
         ("事件检测层（特征提取、状态机）", 5.9, "#AED6F1"),
         ("分级输出层（选帧、压缩、协议封装）", 4.1, "#85C1E9"),
         ("协同通信层（USB/WiFi/BLE，双向）", 2.3, "#D7BDE2"),
     ]
-    for txt, y, c in items_r:
+    for txt, y, c in right_items:
         box(ax_r, 1, y, 8, 1.5, txt, color=c, fontsize=9, bold=True)
-    for i in range(4):
-        arrow_down(ax_r, 5, 8.2 - i*1.8, 7.9 - i*1.8, "#999", 0.8)
+    # 层间箭头
+    for top_y in [9.3, 7.5, 5.7, 3.9]:
+        arrow_down(ax_r, 5, top_y, top_y-1.0, "#999", 0.8)
     ax_r.text(5, 0.6, "双向、自适应、协同", ha="center", fontsize=9, color="gray", style="italic")
 
     save(fig, "fig_9_1.png")
@@ -180,46 +184,46 @@ def fig_9_3():
 # 图9-4 高速外设数据流 — 修复标注重叠
 # ============================================================
 def fig_9_4():
-    fig, ax = plt.subplots(figsize=(16, 6))
-    ax.set_xlim(-1, 18); ax.set_ylim(0, 9.5); ax.axis("off")
+    fig, ax = plt.subplots(figsize=(16, 6.5))
+    ax.set_xlim(-1, 18); ax.set_ylim(0, 10.5); ax.axis("off")
     ax.set_title("图9-4  ESP32-P4高速外设带宽与数据流示意图", fontsize=13, weight="bold", y=0.97)
 
     # 传感器 — 左侧
-    box(ax, 0.5, 3.5, 2.8, 1.6, "OV5645\nCMOS传感器", color="#D5F5E3", fontsize=9, bold=True)
-    # 带宽标注放在传感器下方，避开重叠
-    ax.text(1.9, 3.0, "MIPI-CSI 2-lane\n数据率 ≈160Mbps", ha="center", fontsize=7, color="#1E8449",
-            bbox=dict(facecolor="white", alpha=0.8, edgecolor="none", pad=2))
+    box(ax, 0.5, 3.8, 2.8, 1.6, "OV5645\nCMOS传感器", color="#D5F5E3", fontsize=9, bold=True)
+    # 带宽标注放在传感器下方
+    ax.text(1.9, 3.3, "MIPI-CSI 2-lane\n数据率≈160Mbps", ha="center", fontsize=7, color="#1E8449",
+            bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=2))
 
     # SoC框
-    r = FancyBboxPatch((4.5, 1.2), 9.5, 7.0, boxstyle="round,pad=0.2",
+    r = FancyBboxPatch((4.5, 1.5), 9.5, 7.0, boxstyle="round,pad=0.2",
                        facecolor="#EBF5FB", edgecolor="#1A5276", linewidth=1.3, zorder=0)
     ax.add_patch(r)
-    ax.text(9.25, 7.8, "ESP32-P4 SoC", ha="center", fontsize=11, weight="bold", color="#1A5276")
+    ax.text(9.25, 8.1, "ESP32-P4 SoC", ha="center", fontsize=11, weight="bold", color="#1A5276")
 
     # SoC内部模块
-    box(ax, 5.2, 5.3, 2.2, 1.2, "MIPI D-PHY\n→ DMA", color="#FCF3CF", fontsize=8)
-    box(ax, 8.2, 5.3, 2.0, 1.2, "PSRAM\n帧缓冲", color="#FDEBD0", fontsize=8)
-    box(ax, 11.0, 5.3, 2.3, 1.2, "JPEG硬件\n编码器", color="#FADBD8", fontsize=8)
+    box(ax, 5.2, 5.5, 2.2, 1.2, "MIPI D-PHY\n→ DMA", color="#FCF3CF", fontsize=8)
+    box(ax, 8.2, 5.5, 2.0, 1.2, "PSRAM\n帧缓冲", color="#FDEBD0", fontsize=8)
+    box(ax, 11.0, 5.5, 2.3, 1.2, "JPEG硬件\n编码器", color="#FADBD8", fontsize=8)
 
-    arrow_right(ax, 7.45, 8.1, 5.9, "#555", 0.8)
-    arrow_right(ax, 10.25, 11.0, 5.9, "#555", 0.8)
+    arrow_right(ax, 7.45, 8.1, 6.1, "#555", 0.8)
+    arrow_right(ax, 10.25, 11.0, 6.1, "#555", 0.8)
 
     # USB输出路径
-    box(ax, 6.8, 2.5, 2.5, 1.2, "DMA → USB OTG", color="#FCF3CF", fontsize=8)
-    arrow(ax, 9.25, 5.2, 8.0, 3.8, "#888", 0.6)
+    box(ax, 6.8, 2.8, 2.5, 1.2, "DMA → USB OTG", color="#FCF3CF", fontsize=8)
+    arrow(ax, 9.25, 5.4, 8.0, 4.1, "#888", 0.6)
 
-    # Arrow 传感器→SoC
-    arrow(ax, 3.5, 4.3, 4.3, 4.3, "#1E8449", 1.2)
+    # 传感器→SoC箭头
+    arrow(ax, 3.5, 4.6, 4.3, 4.6, "#1E8449", 1.2)
 
     # 右侧输出 — USB
-    arrow(ax, 14.2, 5.9, 16.0, 5.9, "#922B21", 1.3)
-    ax.text(17.0, 5.9, "USB 2.0 HS\nCDC-ACM\n有效≈1MB/s", ha="center", fontsize=8, color="#922B21",
+    arrow(ax, 14.2, 6.1, 15.8, 6.1, "#922B21", 1.3)
+    ax.text(17.0, 6.1, "USB 2.0 HS\nCDC-ACM\n有效≈1MB/s", ha="center", fontsize=8, color="#922B21",
             bbox=dict(facecolor="white", alpha=0.7, edgecolor="none"))
 
-    # 上方输出 — DSI
-    arrow(ax, 9.25, 8.3, 9.25, 9.2, "#1A5276", 1.2)
-    ax.text(9.25, 9.5, "MIPI-DSI 1-lane, 720p LCD", ha="center", fontsize=8, color="#1A5276",
-            bbox=dict(facecolor="white", alpha=0.7, edgecolor="none"))
+    # 上方输出 — DSI (降低位置确保可见)
+    arrow(ax, 9.25, 8.6, 9.25, 9.4, "#1A5276", 1.2)
+    ax.text(9.25, 10.0, "MIPI-DSI 1-lane，720p LCD", ha="center", fontsize=8, color="#1A5276",
+            bbox=dict(facecolor="white", alpha=0.9, edgecolor="#AED6F1", pad=3))
 
     save(fig, "fig_9_4.png")
 
@@ -234,24 +238,24 @@ def fig_9_5():
 
     y = 22.5
     mid_x = 6.0
+    BOX_H = 0.8  # 模块框高度
+    GAP = 0.4    # 框间额外间距（箭头长度）
 
     # ROM Bootloader
-    box(ax, mid_x-2.5, y, 5, 0.9, "ROM Bootloader → Flash Bootloader", color="#D5D8DC", fontsize=10, bold=True)
-    arrow_down(ax, mid_x, y-0.05, y-1.0)
-    y -= 1.2
+    box(ax, mid_x-2.5, y, 5, BOX_H, "ROM Bootloader → Flash Bootloader", color="#D5D8DC", fontsize=10, bold=True)
+    arrow_down(ax, mid_x, y, y - GAP)
+    y = y - GAP
 
     # app_main
-    box(ax, mid_x-2.5, y, 5, 0.9, "app_main()", color="#AED6F1", fontsize=10, bold=True)
-    ax.text(0.8, y+0.3, "NVS初始化\n(含错误恢复)", fontsize=7, color="#1A5276", ha="center")
-    arrow_down(ax, mid_x, y-0.05, y-1.0)
-    y -= 1.2
+    box(ax, mid_x-2.5, y - BOX_H, 5, BOX_H, "app_main()", color="#AED6F1", fontsize=10, bold=True)
+    ax.text(0.8, y - BOX_H/2, "NVS初始化\n(含错误恢复)", fontsize=7, color="#1A5276", ha="center")
+    arrow_down(ax, mid_x, y - BOX_H, y - BOX_H - GAP)
+    y = y - BOX_H - GAP
 
     # app_start
-    box(ax, mid_x-2.5, y, 5, 0.9, "app_start()", color="#AED6F1", fontsize=10, bold=True)
-    # 向下箭头
-    ax.annotate("", xy=(mid_x, y-0.6), xytext=(mid_x, y-0.05),
-                arrowprops=dict(arrowstyle="->", color="#555", lw=1))
-    y -= 1.5
+    box(ax, mid_x-2.5, y - BOX_H, 5, BOX_H, "app_start()", color="#AED6F1", fontsize=10, bold=True)
+    arrow_down(ax, mid_x, y - BOX_H, y - BOX_H - GAP)
+    y = y - BOX_H - GAP
 
     mods = [
         ("bsp_init", "板级支持包", "#D5F5E3"),
@@ -265,15 +269,17 @@ def fig_9_5():
         ("diag_start", "诊断模块", "#D5D8DC"),
     ]
 
-    for func, desc, color in mods:
+    for i, (func, desc, color) in enumerate(mods):
         is_disp = "display" in func
+        is_last = (i == len(mods) - 1)
         ls = "dashed" if is_disp else "solid"
-        # 模块框
-        r = FancyBboxPatch((mid_x-3.5, y-0.4), 7, 0.8, boxstyle="round,pad=0.05",
+
+        # 框：左下角 (mid_x-3.5, y - BOX_H)
+        r = FancyBboxPatch((mid_x-3.5, y - BOX_H), 7, BOX_H, boxstyle="round,pad=0.05",
                            facecolor=color, edgecolor="#888", linewidth=0.7, linestyle=ls, zorder=2)
         ax.add_patch(r)
-        ax.text(mid_x-3.0, y, func, fontsize=9, weight="bold", va="center", zorder=3)
-        ax.text(mid_x+0.8, y, desc, fontsize=8, va="center", color="#555", zorder=3)
+        ax.text(mid_x-3.0, y - BOX_H/2, func, fontsize=9, weight="bold", va="center", zorder=3)
+        ax.text(mid_x+0.8, y - BOX_H/2, desc, fontsize=8, va="center", color="#555", zorder=3)
 
         # 错误处理策略
         if is_disp:
@@ -282,15 +288,16 @@ def fig_9_5():
         else:
             err_txt = "ESP_RETURN_\nON_ERROR"
             err_bg = "#FADBD8"
-        ax.text(10.8, y, err_txt, fontsize=6.5, va="center", ha="center", color="#922B21",
+        ax.text(10.8, y - BOX_H/2, err_txt, fontsize=6.5, va="center", ha="center", color="#922B21",
                 bbox=dict(boxstyle="round,pad=0.2", facecolor=err_bg, alpha=0.8, edgecolor="none"), zorder=3)
 
-        # 箭头 (非display模块用实线，display用虚线)
-        if not is_disp:
-            arrow_down(ax, mid_x, y-0.5, y-1.0)
-        else:
-            ax.plot([mid_x, mid_x], [y-0.5, y-1.0], color="#888", lw=0.8, linestyle="dashed")
-        y -= 1.0
+        # 箭头：从框底到下一框顶（最后一个模块后不画箭头）
+        if not is_last:
+            if not is_disp:
+                arrow(ax, mid_x, y - BOX_H, mid_x, y - BOX_H - GAP)
+            else:
+                ax.plot([mid_x, mid_x], [y - BOX_H, y - BOX_H - GAP], color="#888", lw=0.8, linestyle="dashed")
+            y = y - BOX_H - GAP
 
     save(fig, "fig_9_5.png")
 

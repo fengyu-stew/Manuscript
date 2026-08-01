@@ -326,86 +326,74 @@ def fig_9_5():
 # 图9-6 组件依赖图 — 重修分层布局
 # ============================================================
 def fig_9_6():
-    fig, ax = plt.subplots(figsize=(14, 8.5))
-    ax.set_xlim(0, 16); ax.set_ylim(0, 13); ax.axis("off")
-    ax.set_title("图9-6  evt_sem_P4组件依赖关系图（箭头指向被依赖方）", fontsize=12, weight="bold", y=0.98)
+    """组件依赖关系 — 简化版：层间粗箭头 + 层内并列，去除蛛网线"""
+    fig, ax = plt.subplots(figsize=(14, 7))
+    ax.set_xlim(0, 16); ax.set_ylim(0, 11); ax.axis("off")
+    ax.set_title("图9-6  evt_sem_P4组件依赖关系图（↓ 箭头指向被依赖层）", fontsize=12, weight="bold", y=0.98)
 
-    # 分层坐标 (layer, y)
-    layers = {
-        "L0": 1.0,   # bsp
-        "L1": 3.0,   # frame_ring
-        "L2": 5.2,   # trigger, algo_trigger, frame_export
-        "L3": 7.4,   # usb_frame_bridge, camera_frontend
-        "L4": 9.6,   # display_frontend
-        "L5": 11.8,   # app, diag
-    }
-
-    # 画层级背景线
-    for name, ly in layers.items():
-        ax.axhline(y=ly, xmin=0.02, xmax=0.98, color="#CCCCCC", lw=0.5, linestyle="dotted", zorder=0)
-        ax.text(0.15, ly-0.3, name, fontsize=7, color="#AAAAAA")
-
-    # 各层组件 (name, desc, x, y, w, h, color)
-    comps = [
-        # L0
-        ("bsp", "板级支持包", 5.5, layers["L0"]-0.3, 5, 0.8, "#D5F5E3"),
-        # L1
-        ("frame_ring", "帧元数据环形缓冲", 5.5, layers["L1"]-0.3, 5, 0.8, "#ABEBC6"),
-        # L2
-        ("trigger", "触发器抽象层", 1.5, layers["L2"]-0.3, 3.5, 0.8, "#FCF3CF"),
-        ("algo_trigger", "算法触发器", 6.25, layers["L2"]-0.3, 3.5, 0.8, "#AED6F1"),
-        ("frame_export", "帧导出模块", 11.0, layers["L2"]-0.3, 3.5, 0.8, "#FCF3CF"),
-        # L3
-        ("usb_frame_bridge", "USB协议栈与传输", 5.5, layers["L3"]-0.3, 5, 0.8, "#D7BDE2"),
-        ("camera_frontend", "摄像头采集主循环", 1.5, layers["L3"]+0.5, 4, 1.2, "#F5B7B1"),
-        # L4
-        ("display_frontend", "显示与LVGL UI", 5.5, layers["L4"]-0.3, 5, 0.8, "#FADBD8"),
-        # L5
-        ("app", "应用入口与编排", 2.5, layers["L5"]-0.3, 4.5, 0.8, "#AED6F1"),
-        ("diag", "诊断任务(读取所有组件)", 9.0, layers["L5"]-0.3, 5.5, 0.8, "#D5D8DC"),
+    # 6层定义
+    layers = [
+        ("L0: 板级支持", 0.8, ["bsp"], "#D5F5E3"),
+        ("L1: 帧元数据", 2.3, ["frame_ring"], "#ABEBC6"),
+        ("L2: 触发与导出", 3.8, ["trigger", "algo_trigger", "frame_export"], "#FCF3CF"),
+        ("L3: 协议与采集", 5.3, ["usb_frame_bridge", "camera_frontend"], "#AED6F1"),
+        ("L4: 显示", 6.8, ["display_frontend"], "#FADBD8"),
+        ("L5: 应用与诊断", 8.3, ["app", "diag"], "#D5D8DC"),
     ]
 
-    # 组件位置映射
-    cpos = {}  # name -> (cx, top, bottom)
-    for name, desc, x, y, w, h, color in comps:
-        box(ax, x, y, w, h, f"{name}\n({desc})", color=color, fontsize=7.5, bold=("app" in name or "bsp" in name))
-        cpos[name] = (x + w/2, y+h, y)  # cx, top, bottom
+    layer_centers = []  # (label, y_mid, x_range)
 
-    # 画依赖箭头 (从上层指向下层，从调用中点向下)
-    def dep_arrow(caller, callee, lw=0.6):
-        if caller in cpos and callee in cpos:
-            cx, _, cbot = cpos[caller]
-            _, ctop, _ = cpos[callee]
-            arrow(ax, cx, cbot, cpos[callee][0], ctop, "#888888", lw)
+    for label, y, comps, color in layers:
+        n = len(comps)
+        # 组件框均匀分布
+        total_w = 12
+        box_w = total_w / n - 0.5
+        box_h = 0.7
+        for i, cname in enumerate(comps):
+            x = 2.0 + i * (total_w / n)
+            box(ax, x, y, box_w, box_h, cname, color=color, fontsize=8.5, bold=(cname in ["app", "camera_frontend"]))
+        # 层标签
+        ax.text(0.3, y + box_h/2, label, fontsize=7.5, color="#888", va="center")
+        layer_centers.append((y + box_h/2, y))
 
-    dep_arrow("bsp", "frame_ring")  # bsp被frame_ring依赖... wait
-    # 实际上 frame_ring 不依赖 bsp，但 bsp 是先决条件。让我画 frame_ring 依赖链路。
+    # 层间依赖关系 — 用简洁的垂直粗箭头标注
+    # 规则：上层依赖紧邻下层（大多数情况），特殊情况单独标注
+    dep_annotations = [
+        # (from_layer_idx, to_layer_idx, note)
+        (1, 0, ""),   # L1→L0(frame_ring依赖bsp? 实际不依赖，但bsp在L0)
+        # 实际上 frame_ring 不依赖 bsp，所以 L1→L0 无依赖
+        (2, 1, "trigger/algo_trigger\nframe_export\n依赖 frame_ring"),  # L2→L1
+        (3, 1, "usb_frame_bridge\n依赖 frame_ring"),  # L3→L1
+        (3, 2, "camera_frontend 依赖\nL2全部+L1"),  # L3→L2
+        (4, 2, "display_frontend\n依赖 algo_trigger"),  # L4→L2
+        (5, 3, "app 依赖\ncamera_frontend"),  # L5→L3
+        (5, 4, "app 依赖\ndisplay_frontend"),  # L5→L4
+    ]
 
-    # 正确的依赖关系：
-    # L1 ← L0: 无（bsp无依赖）
-    # L2 ← L1: trigger, algo_trigger, frame_export 都依赖 frame_ring
-    dep_arrow("trigger", "frame_ring")
-    dep_arrow("algo_trigger", "frame_ring")
-    dep_arrow("frame_export", "frame_ring")
+    # 画主要的层间依赖箭头（粗线）
+    # L2→L1
+    arrow(ax, 8, 3.5, 8, 2.75, "#4A90D9", 1.6)
+    # L3→L2
+    arrow(ax, 5, 5.0, 5, 4.3, "#4A90D9", 1.6)
+    # L3→L1 (usb_frame_bridge → frame_ring)
+    arrow(ax, 3.2, 5.0, 10, 2.75, "#4A90D9", 1.3)
+    # L4→L2
+    arrow(ax, 8, 6.5, 10, 4.3, "#4A90D9", 1.3)
+    # L5→L3
+    arrow(ax, 5, 8.0, 7, 5.75, "#4A90D9", 1.3)
+    # L5→L4
+    arrow(ax, 8, 8.0, 8, 7.25, "#4A90D9", 1.3)
 
-    # L3 ← L1: usb_frame_bridge 依赖 frame_ring
-    dep_arrow("usb_frame_bridge", "frame_ring")
+    # 依赖文字标注
+    ax.text(9.5, 3.0, "L2依赖L1", fontsize=7, color="#4A90D9", style="italic")
+    ax.text(6.2, 4.6, "L3依赖L1+L2", fontsize=7, color="#4A90D9", style="italic")
+    ax.text(8.5, 5.8, "camera_frontend\n→L1+L2", fontsize=6.5, color="#4A90D9", style="italic")
+    ax.text(8.5, 7.2, "L5依赖L3+L4", fontsize=7, color="#4A90D9", style="italic")
 
-    # L3 camera_frontend 依赖很多
-    for callee in ["frame_ring", "trigger", "algo_trigger", "frame_export", "usb_frame_bridge"]:
-        dep_arrow("camera_frontend", callee)
-
-    # L4 ← L2: display_frontend 依赖 algo_trigger
-    dep_arrow("display_frontend", "algo_trigger")
-
-    # L5 app 依赖 camera_frontend, display_frontend, ...
-    for callee in ["camera_frontend", "display_frontend"]:
-        dep_arrow("app", callee)
-
-    # diag 读取所有组件
-    for callee in ["bsp", "frame_ring", "trigger", "algo_trigger", "frame_export",
-                    "usb_frame_bridge", "camera_frontend", "display_frontend"]:
-        arrow(ax, cpos["diag"][0], cpos["diag"][2], cpos[callee][0], cpos[callee][1], "#CCBBBB", 0.4)
+    # diag 特殊标注（不画8条线）
+    ax.text(13.5, 8.8, "diag: 以只读方式\n读取所有组件状态\n（无依赖箭头）",
+            fontsize=6.5, color="#B03A2E", ha="center", style="italic",
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="#FADBD8", edgecolor="#E6B0AA", alpha=0.9))
 
     save(fig, "fig_9_6.png")
 

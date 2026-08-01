@@ -56,41 +56,44 @@ def arrow_right(ax, x1, x2, y, color="#555555", lw=1.0):
 
 
 # ============================================================
-# 图9-1 功能层次对比 — 还原v1版本（带层间箭头标注）
+# 图9-1 功能层次对比 — 完全还原用户选中的v1原版
 # ============================================================
 def fig_9_1():
-    fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(13, 6))
-    fig.suptitle("图9-1  传统嵌入式终端与智能嵌入式系统功能层次对比", fontsize=13, weight="bold", y=0.97)
+    fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(13, 7.5))
+    fig.suptitle("图9-1  传统嵌入式终端与智能嵌入式系统功能层次对比", fontsize=13, weight="bold", y=0.98)
 
-    # 左侧
-    ax_l.set_xlim(0, 10); ax_l.set_ylim(0, 12); ax_l.axis("off")
-    ax_l.set_title("传统MCU终端", fontsize=11, weight="bold", pad=6)
-    # v1 原版：层间有箭头文字标注
-    box(ax_l, 1.5, 9, 7, 1.3, "感知层", color="#F1948A", fontsize=10, bold=True)
-    ax_l.text(5, 8.2, "↓ 模拟信号", ha="center", fontsize=8, color="#555")
-    arrow_down(ax_l, 5, 7.9, 7.2, "#999", 0.8)
-    box(ax_l, 1.5, 6, 7, 1.3, "控制层\n（固化逻辑）", color="#F5B7B1", fontsize=10, bold=True)
-    ax_l.text(5, 5.2, "↓ 控制信号", ha="center", fontsize=8, color="#555")
-    arrow_down(ax_l, 5, 4.9, 4.2, "#999", 0.8)
-    box(ax_l, 1.5, 3.2, 7, 1.3, "执行层", color="#F1948A", fontsize=10, bold=True)
-    ax_l.text(5, 1.6, "单向、固化控制流", ha="center", fontsize=9, color="gray", style="italic")
+    # 左侧 - 传统MCU终端
+    ax_l.set_xlim(0, 10)
+    ax_l.set_ylim(0, 12)
+    ax_l.axis("off")
+    ax_l.set_title("传统MCU终端", fontsize=12, weight="bold", pad=10)
 
-    # 右侧
-    ax_r.set_xlim(0, 10); ax_r.set_ylim(0, 12); ax_r.axis("off")
-    ax_r.set_title("智能嵌入式系统", fontsize=11, weight="bold", pad=6)
-    right_items = [
-        ("感知层（多传感器融合）", 9.5, "#D5F5E3"),
-        ("预处理层（降采样、滤波）", 7.7, "#ABEBC6"),
-        ("事件检测层（特征提取、状态机）", 5.9, "#AED6F1"),
-        ("分级输出层（选帧、压缩、协议封装）", 4.1, "#85C1E9"),
-        ("协同通信层（USB/WiFi/BLE，双向）", 2.3, "#D7BDE2"),
-    ]
-    for txt, y, c in right_items:
-        box(ax_r, 1, y, 8, 1.5, txt, color=c, fontsize=9, bold=True)
-    # 层间箭头
-    for top_y in [9.3, 7.5, 5.7, 3.9]:
-        arrow_down(ax_r, 5, top_y, top_y-1.0, "#999", 0.8)
-    ax_r.text(5, 0.6, "双向、自适应、协同", ha="center", fontsize=9, color="gray", style="italic")
+    layers_L = [("感知层", 9, "#F1948A"),
+                ("↓ 模拟信号", 8, "white"),
+                ("控制层\n（固化逻辑）", 6, "#F5B7B1"),
+                ("↓ 控制信号", 5, "white"),
+                ("执行层", 3.5, "#F1948A")]
+    for text, y, color in layers_L:
+        h = 1.2 if "\n" not in text else 1.5
+        c = color if color != "white" else "white"
+        box(ax_l, 1.5, y, 7, h, text, color=c, fontsize=10)
+    ax_l.text(5, 1.2, "单向、固化", ha="center", fontsize=9, color="gray", style="italic")
+
+    # 右侧 - 智能嵌入式系统
+    ax_r.set_xlim(0, 10)
+    ax_r.set_ylim(0, 12)
+    ax_r.axis("off")
+    ax_r.set_title("智能嵌入式系统", fontsize=12, weight="bold", pad=10)
+
+    layers_R = [("感知层\n（多传感器融合）", 9.5, "#D5F5E3"),
+                ("预处理层\n（降采样、滤波）", 7.8, "#ABEBC6"),
+                ("事件检测层\n（特征提取、状态机）", 5.8, "#AED6F1"),
+                ("分级输出层\n（选帧、压缩、协议封装）", 3.5, "#85C1E9"),
+                ("协同通信层\n（USB/WiFi/BLE，双向）", 1.2, "#D7BDE2")]
+    for text, y, color in layers_R:
+        box(ax_r, 1, y, 8, 1.5, text, color=color, fontsize=9)
+
+    ax_r.text(5, 0.2, "双向、自适应", ha="center", fontsize=9, color="gray", style="italic")
 
     save(fig, "fig_9_1.png")
 

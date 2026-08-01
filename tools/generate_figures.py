@@ -106,32 +106,40 @@ def fig_9_2():
     ax.set_xlim(-3.2, 16); ax.set_ylim(0, 10.5); ax.axis("off")
     ax.set_title("图9-2  evt_sem_P4三种信息流示意图", fontsize=13, weight="bold", y=0.96)
 
-    # 三条通道，y坐标拉开距离
+    # 三条通道
+    # 数据流和事件流: 模块从左到右排列，箭头左→右
+    # 控制流: 命令从USB-Serial RX（右）进入，向左传递到各模块，箭头右→左
     channels = [
         ("数据流", "（RGB565，960×720@15fps，单向）",
-         7.5, "#FFF9C4",
+         7.5, "#FFF9C4", "L→R",
          [("传感器", 1.2), ("MIPI-CSI", 4.0), ("V4L2 DMA", 6.8), ("PSRAM\n帧缓冲", 9.6), ("JPEG编码", 12.4)]),
         ("事件流", "（EVTF v2+JSON，离散触发，单向）",
-         4.5, "#E1F5FE",
+         4.5, "#E1F5FE", "L→R",
          [("算法\n模块", 1.2), ("证据\n编码", 4.5), ("USB Bridge\n发送队列", 7.8), ("USB-Serial\nTX", 11.5)]),
-        ("控制流", "（JSON指令，双向，低带宽）",
-         1.5, "#FCE4EC",
+        ("控制流", "（JSON指令，双向，低带宽，←→）",
+         1.5, "#FCE4EC", "R→L",
          [("USB-Serial\nRX", 11.5), ("指令\n解析", 8.0), ("模块\n配置", 4.5), ("状态\n查询", 1.2)]),
     ]
 
-    for ch_name, ch_desc, ch_y, ch_color, nodes in channels:
-        # 通道背景色带
+    for ch_name, ch_desc, ch_y, ch_color, direction, nodes in channels:
         ax.axhspan(ch_y - 0.5, ch_y + 1.0, xmin=0.04, xmax=0.97, alpha=0.12, color=ch_color, zorder=0)
-        # 通道标签放在左侧空白区，不与模块重叠
         ax.text(-2.8, ch_y + 0.6, ch_name, fontsize=10, weight="bold", color="#1A5276", va="center")
         ax.text(-2.8, ch_y + 0.1, ch_desc, fontsize=7, color="#555555", va="center")
-        # 模块
+
         for txt, nx in nodes:
             box(ax, nx, ch_y + 0.05, 2.0, 0.9, txt, fontsize=8)
-        # 模块间箭头
+
+        # 画模块间箭头
         xs = [p[1] for p in nodes]
-        for i in range(len(xs)-1):
-            arrow_right(ax, xs[i]+2.05, xs[i+1]-0.05, ch_y+0.5, "#666", 0.8)
+        for i in range(len(xs) - 1):
+            if direction == "L→R":
+                # 左→右：前一个框的右边 → 后一个框的左边
+                x_from = xs[i] + 2.05
+                x_to = xs[i+1] - 0.05
+            else:  # R→L：前一个框的左边 → 后一个框的右边
+                x_from = xs[i] - 0.05
+                x_to = xs[i+1] + 2.05
+            arrow(ax, x_from, ch_y + 0.5, x_to, ch_y + 0.5, "#666", 0.9)
 
     save(fig, "fig_9_2.png")
 

@@ -240,9 +240,9 @@ def fig_9_4():
     ax.text(17.0, 6.1, "USB 2.0 HS\nCDC-ACM\n有效≈1MB/s", ha="center", fontsize=8, color="#922B21",
             bbox=dict(facecolor="white", alpha=0.7, edgecolor="none"))
 
-    # 上方输出 — DSI (降低位置确保可见)
+    # 上方输出 — DSI
     arrow(ax, 9.25, 8.6, 9.25, 9.4, "#1A5276", 1.2)
-    ax.text(9.25, 10.0, "MIPI-DSI 1-lane，720p LCD", ha="center", fontsize=8, color="#1A5276",
+    ax.text(9.25, 9.55, "MIPI-DSI 1-lane，720p LCD", ha="center", fontsize=8, color="#1A5276",
             bbox=dict(facecolor="white", alpha=0.9, edgecolor="#AED6F1", pad=3))
 
     save(fig, "fig_9_4.png")

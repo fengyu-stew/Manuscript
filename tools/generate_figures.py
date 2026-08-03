@@ -244,8 +244,8 @@ def fig_9_4():
 # 图9-5 启动流程 — 修复箭头，增大间距
 # ============================================================
 def fig_9_5():
-    fig, ax = plt.subplots(figsize=(10, 13))
-    ax.set_xlim(0, 12); ax.set_ylim(0, 24); ax.axis("off")
+    fig, ax = plt.subplots(figsize=(10, 9.5))
+    ax.set_xlim(0, 12); ax.set_ylim(8, 24); ax.axis("off")
     y = 22.5
     mid_x = 6.0
     BOX_H = 0.8  # 模块框高度

@@ -65,8 +65,6 @@ def arrow_right(ax, x1, x2, y, color="#555555", lw=1.0):
 # ============================================================
 def fig_9_1():
     fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(13, 7.5))
-    fig.suptitle("图9-1  传统嵌入式终端与智能嵌入式系统功能层次对比", fontsize=13, weight="bold", y=0.98)
-
     # 左侧 - 传统MCU终端
     ax_l.set_xlim(0, 10)
     ax_l.set_ylim(0, 12)
@@ -109,8 +107,6 @@ def fig_9_1():
 def fig_9_2():
     fig, ax = plt.subplots(figsize=(16, 5.5))
     ax.set_xlim(-3.2, 16); ax.set_ylim(0, 10.5); ax.axis("off")
-    ax.set_title("图9-2  evt_sem_P4三种信息流示意图", fontsize=13, weight="bold", y=0.96)
-
     # 三条通道
     # 数据流和事件流: 模块从左到右排列，箭头左→右
     # 控制流: 命令从USB-Serial RX（右）进入，向左传递到各模块，箭头右→左
@@ -159,8 +155,6 @@ def fig_9_2():
 def fig_9_3():
     fig, ax = plt.subplots(figsize=(15, 6.5))
     ax.set_xlim(-1, 17); ax.set_ylim(-0.5, 9.5); ax.axis("off")
-    ax.set_title("图9-3  evt_sem_P4系统功能划分与外部接口框图", fontsize=13, weight="bold", y=0.97)
-
     # 中央虚线框
     sys_r = FancyBboxPatch((1.5, 0.8), 13, 7.8, boxstyle="round,pad=0.25",
                            facecolor="#EBF5FB", edgecolor="#1A5276", linewidth=1.2, linestyle="--", zorder=0)
@@ -206,8 +200,6 @@ def fig_9_3():
 def fig_9_4():
     fig, ax = plt.subplots(figsize=(16, 6.5))
     ax.set_xlim(-1, 18); ax.set_ylim(0, 10.5); ax.axis("off")
-    ax.set_title("图9-4  ESP32-P4高速外设带宽与数据流示意图", fontsize=13, weight="bold", y=0.97)
-
     # 传感器 — 左侧
     box(ax, 0.5, 3.8, 2.8, 1.6, "OV5645\nCMOS传感器", color="#D5F5E3", fontsize=9, bold=True)
     # 带宽标注放在传感器下方
@@ -254,8 +246,6 @@ def fig_9_4():
 def fig_9_5():
     fig, ax = plt.subplots(figsize=(10, 13))
     ax.set_xlim(0, 12); ax.set_ylim(0, 24); ax.axis("off")
-    ax.set_title("图9-5  evt_sem_P4固件启动流程", fontsize=13, weight="bold", y=0.99)
-
     y = 22.5
     mid_x = 6.0
     BOX_H = 0.8  # 模块框高度
@@ -329,8 +319,6 @@ def fig_9_6():
     """组件依赖关系 — 简化版：层间粗箭头 + 层内并列，去除蛛网线"""
     fig, ax = plt.subplots(figsize=(14, 7))
     ax.set_xlim(0, 16); ax.set_ylim(0, 11); ax.axis("off")
-    ax.set_title("图9-6  evt_sem_P4组件依赖关系图（↓ 箭头指向被依赖层）", fontsize=12, weight="bold", y=0.98)
-
     # 6层定义
     layers = [
         ("L0: 板级支持", 0.8, ["bsp"], "#D5F5E3"),
@@ -404,8 +392,6 @@ def fig_9_6():
 def fig_9_7():
     fig, ax = plt.subplots(figsize=(16, 3.5))
     ax.set_xlim(0, 17); ax.set_ylim(0, 5); ax.axis("off")
-    ax.set_title("图9-7  单帧图像在V4L2采集管线中的生命周期", fontsize=13, weight="bold", y=0.95)
-
     phases = [
         ("① 生成\n传感器曝光+读出\n≈33ms", 0.3, 3.3, "#F5B7B1"),
         ("② 传输\nMIPI-CSI+DMA\n≈10ms", 3.9, 2.5, "#F0B27A"),
@@ -436,8 +422,6 @@ def fig_9_7():
 def fig_9_8():
     fig, ax = plt.subplots(figsize=(17, 5))
     ax.set_xlim(0, 18.5); ax.set_ylim(0, 7); ax.axis("off")
-    ax.set_title("图9-8  evt_sem_P4数据通路各阶段过载处理策略", fontsize=13, weight="bold", y=0.96)
-
     stages = [
         ("① 传感器\n输出", 0.5, "#D5F5E3", "无过载\n固定帧率"),
         ("② V4L2 DMA\n缓冲（×6）", 3.2, "#ABEBC6", "丢帧\n6缓冲全满\n时驱动丢弃"),

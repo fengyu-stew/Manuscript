@@ -21,7 +21,7 @@ for fp in ["C:/Windows/Fonts/simhei.ttf", "C:/Windows/Fonts/simsun.ttc", "C:/Win
 plt.rcParams["font.sans-serif"] = ["SimHei", "Microsoft YaHei", "SimSun"]
 plt.rcParams["axes.unicode_minus"] = False
 
-DPI = 200
+DPI = 300
 OUTDIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "figures")
 os.makedirs(OUTDIR, exist_ok=True)
 

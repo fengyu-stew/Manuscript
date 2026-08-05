@@ -311,6 +311,154 @@ def fig_9_8():
     save(fig, "fig_9_8.png")
 
 # ============================================================
+# 图9-9 FSM四态转移图
+# ============================================================
+def fig_9_9():
+    fig, ax = plt.subplots(figsize=(18, 10))
+    ax.set_xlim(0, 16); ax.set_ylim(0, 12); ax.axis("off")
+
+    # 四个状态框 (name, x, y, color)
+    states = [
+        ("F0_IDLE\n空闲态", 1, 7, "#D5F5E3"),
+        ("F1_CANDIDATE\n候选态", 7, 7, "#FCF3CF"),
+        ("F2_TRIGGERED\n触发态", 7, 2, "#FADBD8"),
+        ("F5_COOLDOWN\n冷却态", 1, 2, "#E8DAEF"),
+    ]
+    for name, x, y, c in states:
+        box(ax, x, y, 4.5, 2.0, name, color=c, fontsize=14, bold=True, lw=1.2)
+
+    # 转移箭头
+    # F0→F1: candidate=true
+    arrow(ax, 5.6, 8.5, 6.8, 8.5, "#1A5276", 1.5)
+    ax.text(6.2, 9.1, "candidate", fontsize=11, color="#1A5276", ha="center", weight="bold")
+    # F1→F2: shadow_trigger=true
+    arrow(ax, 9.3, 6.8, 9.3, 4.2, "#922B21", 1.5)
+    ax.text(9.9, 5.5, "shadow_trigger", fontsize=11, color="#922B21", ha="center", weight="bold")
+    # F1→F0: !candidate
+    arrow(ax, 9.3, 8.2, 5.6, 8.2, "#888", 1.2)
+    ax.text(7.5, 8.6, "!candidate", fontsize=10, color="#888", ha="center")
+    # F2→F5: quiet>=8
+    arrow(ax, 5.6, 2.5, 6.8, 2.5, "#1A5276", 1.5)
+    ax.text(6.2, 3.1, "quiet_frames≥8", fontsize=11, color="#1A5276", ha="center", weight="bold")
+    # F5→F0: cooldown_end
+    arrow(ax, 3.3, 2.2, 3.3, 6.8, "#1A5276", 1.5)
+    ax.text(2.4, 4.5, "cooldown=0", fontsize=11, color="#1A5276", ha="center", weight="bold")
+    # F0→F2 (直接触发，跳过candidate)
+    ax.annotate("", xy=(10.8, 3.5), xytext=(5.0, 7.5),
+                arrowprops=dict(arrowstyle="->", color="#F39C12", lw=1.2, connectionstyle="arc3,rad=0.3"))
+    ax.text(11.5, 5.5, "直接触发\n(罕见)", fontsize=9, color="#F39C12", ha="center", style="italic")
+
+    # warmup标注
+    ax.text(0.5, 9.5, "预热30帧\n(warmup)", fontsize=10, color="#888", ha="center", style="italic",
+            bbox=dict(facecolor="white", alpha=0.8, edgecolor="none"))
+    arrow(ax, 1.5, 9.3, 3.0, 8.8, "#888", 0.8)
+
+    ax.set_title("事件检测有限状态机（FSM）状态转移", fontsize=16, weight="bold", pad=12, color="#1A5276")
+    save(fig, "fig_9_9.png")
+
+# ============================================================
+# 图9-10 滑动窗口投票示意
+# ============================================================
+def fig_9_10():
+    fig, ax = plt.subplots(figsize=(18, 7))
+    ax.set_xlim(0, 18); ax.set_ylim(0, 8); ax.axis("off")
+    ax.set_title("滑动窗口投票机制（WINDOW_SIZE=5, WINDOW_HITS=3）", fontsize=16, weight="bold", pad=12, color="#1A5276")
+
+    # 示例帧序列：0,1,1,0,1,1,1,1,0,1
+    frames = [0, 1, 1, 0, 1, 1, 1, 1, 0, 1]
+    for i, val in enumerate(frames):
+        x = 1.5 + i * 1.5
+        c = "#82E0AA" if val == 1 else "#F5B7B1"
+        box(ax, x, 5.5, 1.2, 1.0, str(val), color=c, fontsize=14, bold=True)
+        ax.text(x+0.6, 5.0, f"f{i}", ha="center", fontsize=9, color="#555")
+
+    # 窗口标注
+    # 时刻5 (i=5): 帧2-6 = [1,0,1,1,1] → hits=4 ≥ 3 → 触发
+    # 时刻6 (i=6): 帧3-7 = [0,1,1,1,1] → hits=4 ≥ 3
+    windows = [(5, 3, 8, "✓ 4≥3\n触发!"), (6, 4, 8, "✓ 4≥3\n保持")]
+    for w_end, w_start, y_pos, label in windows:
+        x0 = 1.5 + w_start * 1.5 - 0.3
+        x1 = 1.5 + w_end * 1.5 + 0.9
+        r = FancyBboxPatch((x0, 4.0), x1-x0, 0.8, boxstyle="round,pad=0.05",
+                           facecolor="none", edgecolor="#E74C3C", linewidth=2.0, linestyle="dashed")
+        ax.add_patch(r)
+        ax.text((x0+x1)/2, 4.4, label, ha="center", fontsize=11, color="#E74C3C", weight="bold")
+
+    # 图例
+    ax.text(1.5, 3.0, "1 = 候选帧（candidate=true）", fontsize=11, color="#1E8449")
+    ax.text(1.5, 2.3, "0 = 非候选帧", fontsize=11, color="#922B21")
+    ax.text(1.5, 1.6, "虚线框 = 滑动窗口（5帧），框内1的个数≥3时触发事件", fontsize=11, color="#E74C3C")
+
+    save(fig, "fig_9_10.png")
+
+# ============================================================
+# 图9-11 EVTF v1/v2帧结构对比
+# ============================================================
+def fig_9_11():
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(20, 10))
+    fig.subplots_adjust(hspace=0.5)
+
+    # === v1 ===
+    ax1.set_xlim(0, 20); ax1.set_ylim(0, 6); ax1.axis("off")
+    ax1.set_title("EVTF v1 帧结构（32字节固定帧头 + 图像载荷 + 可选JSON拖车）", fontsize=15, weight="bold", pad=8, color="#1A5276")
+
+    v1_fields = [
+        ("magic\n4B", 0.3, "#FCF3CF"), ("version\n2B", 2.0, "#FCF3CF"), ("hdr_size\n2B", 3.2, "#FCF3CF"),
+        ("flags\n4B", 4.5, "#AED6F1"), ("frame_id\n4B", 6.5, "#FCF3CF"), ("timestamp\n4B", 8.5, "#FCF3CF"),
+        ("width\n2B", 10.5, "#FCF3CF"), ("height\n2B", 11.7, "#FCF3CF"), ("fourcc\n4B", 13.0, "#FCF3CF"),
+        ("stride\n4B", 15.0, "#FCF3CF"), ("payload_len\n4B", 17.0, "#FCF3CF"), ("checksum\n4B", 19.0, "#AED6F1"),
+    ]
+    for txt, x, c in v1_fields:
+        box(ax1, x, 3.5, 1.5, 1.8, txt, color=c, fontsize=8, bold=True, lw=0.5)
+    # 图像载荷
+    r1 = FancyBboxPatch((21.2, 3.8), 5, 1.2, boxstyle="round,pad=0.05",
+                         facecolor="#D5F5E3", edgecolor="#888", linewidth=0.8)
+    ax1.add_patch(r1); ax1.text(23.7, 4.4, "RGB565\n图像载荷", ha="center", fontsize=10, weight="bold")
+    # JSON拖车
+    r2 = FancyBboxPatch((21.2, 2.3), 5, 1.2, boxstyle="round,pad=0.05",
+                         facecolor="#E8DAEF", edgecolor="#888", linewidth=0.8, linestyle="dashed")
+    ax1.add_patch(r2); ax1.text(23.7, 2.9, "JSON拖车\n(flags bit0=1)", ha="center", fontsize=9, color="#7D3C98")
+    ax1.text(0.3, 2.0, "帧头32B →", fontsize=10, color="#555", style="italic")
+    ax1.axvline(x=21.0, ymin=0.15, ymax=0.85, color="#888", lw=1, linestyle="dotted")
+
+    # === v2 ===
+    ax2.set_xlim(0, 20); ax2.set_ylim(0, 6); ax2.axis("off")
+    ax2.set_title("EVTF v2 帧结构（52字节扩展帧头 + JPEG图像载荷 + JSON边车）", fontsize=15, weight="bold", pad=8, color="#1A5276")
+
+    v2_fields = [
+        ("magic\n4B", 0.3, "#FCF3CF"), ("version\n2B", 2.0, "#FCF3CF"), ("hdr_size\n2B", 3.2, "#FCF3CF"),
+        ("flags\n4B", 4.5, "#AED6F1"), ("src_frame\n4B", 6.5, "#FCF3CF"), ("image_id\n4B", 8.5, "#D5F5E3"),
+        ("event_id\n4B", 10.5, "#D5F5E3"), ("timestamp\n4B", 12.5, "#FCF3CF"),
+        ("src_w\n2B", 0.3, "#FCF3CF"), ("src_h\n2B", 1.5, "#FCF3CF"), ("src_fourcc\n4B", 2.8, "#FCF3CF"),
+        ("img_w\n2B", 4.6, "#FCF3CF"), ("img_h\n2B", 5.8, "#FCF3CF"),
+        ("fmt\n2B", 7.0, "#AED6F1"), ("role\n2B", 8.2, "#AED6F1"),
+        ("img_bytes\n4B", 9.5, "#D5F5E3"), ("side_bytes\n4B", 11.5, "#E8DAEF"),
+        ("img_csum\n4B", 13.5, "#AED6F1"), ("side_csum\n4B", 15.5, "#AED6F1"),
+    ]
+    for txt, x, c in v2_fields:
+        y = 3.5 if x < 14 else 3.5  # all on one row for v2
+        box(ax2, x, 3.3, 1.5, 2.0, txt, color=c, fontsize=7.5, bold=True, lw=0.5)
+
+    # JPEG载荷
+    r3 = FancyBboxPatch((17.5, 3.8), 4, 1.2, boxstyle="round,pad=0.05",
+                         facecolor="#D5F5E3", edgecolor="#888", linewidth=0.8)
+    ax2.add_patch(r3); ax2.text(19.5, 4.4, "JPEG\n图像载荷", ha="center", fontsize=10, weight="bold")
+    # JSON边车
+    r4 = FancyBboxPatch((17.5, 2.3), 4, 1.2, boxstyle="round,pad=0.05",
+                         facecolor="#E8DAEF", edgecolor="#888", linewidth=0.8, linestyle="dashed")
+    ax2.add_patch(r4); ax2.text(19.5, 2.9, "JSON边车\n(sidecar)", ha="center", fontsize=9, color="#7D3C98")
+    ax2.axvline(x=17.0, ymin=0.15, ymax=0.85, color="#888", lw=1, linestyle="dotted")
+
+    # 图例
+    ax2.text(0.3, 1.0, "图例：", fontsize=10, weight="bold")
+    for label, x, c in [("固定帧头字段", 3.0, "#FCF3CF"), ("校验/标志字段", 6.5, "#AED6F1"),
+                          ("v2新增字段", 10.5, "#D5F5E3"), ("JSON/元数据", 14.0, "#E8DAEF")]:
+        box(ax2, x, 0.5, 1.8, 0.6, "", color=c, fontsize=6, lw=0.3)
+        ax2.text(x+2.0, 0.8, label, fontsize=9, va="center", color="#555")
+
+    save(fig, "fig_9_11.png")
+
+# ============================================================
 if __name__ == "__main__":
     print("Generating Chapter 9 figures (v3 — large)...")
     fig_9_1()
@@ -321,4 +469,7 @@ if __name__ == "__main__":
     fig_9_6()
     fig_9_7()
     fig_9_8()
+    fig_9_9()
+    fig_9_10()
+    fig_9_11()
     print("Done.")

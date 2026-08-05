@@ -395,66 +395,77 @@ def fig_9_10():
 # 图9-11 EVTF v1/v2帧结构对比
 # ============================================================
 def fig_9_11():
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(20, 10))
-    fig.subplots_adjust(hspace=0.5)
+    """EVTF帧结构对比 — 宽幅单行布局，v1上 v2下，字段清晰可读"""
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(26, 12))
+    fig.subplots_adjust(hspace=0.6)
 
-    # === v1 ===
-    ax1.set_xlim(0, 20); ax1.set_ylim(0, 6); ax1.axis("off")
-    ax1.set_title("EVTF v1 帧结构（32字节固定帧头 + 图像载荷 + 可选JSON拖车）", fontsize=15, weight="bold", pad=8, color="#1A5276")
+    # === v1: 12 fields in one row ===
+    ax1.set_xlim(0, 28); ax1.set_ylim(0, 7); ax1.axis("off")
+    ax1.set_title("EVTF v1 帧结构（32字节固定帧头 + RGB565图像载荷 + 可选JSON拖车）",
+                  fontsize=16, weight="bold", pad=10, color="#1A5276")
 
-    v1_fields = [
-        ("magic\n4B", 0.3, "#FCF3CF"), ("version\n2B", 2.0, "#FCF3CF"), ("hdr_size\n2B", 3.2, "#FCF3CF"),
-        ("flags\n4B", 4.5, "#AED6F1"), ("frame_id\n4B", 6.5, "#FCF3CF"), ("timestamp\n4B", 8.5, "#FCF3CF"),
-        ("width\n2B", 10.5, "#FCF3CF"), ("height\n2B", 11.7, "#FCF3CF"), ("fourcc\n4B", 13.0, "#FCF3CF"),
-        ("stride\n4B", 15.0, "#FCF3CF"), ("payload_len\n4B", 17.0, "#FCF3CF"), ("checksum\n4B", 19.0, "#AED6F1"),
+    v1 = [
+        ("magic\n4B", 0.5, "#FCF3CF"), ("version\n2B", 2.5, "#FCF3CF"), ("hdr_size\n2B", 4.0, "#FCF3CF"),
+        ("flags\n4B", 5.7, "#AED6F1"), ("frame_id\n4B", 7.8, "#FCF3CF"), ("timestamp\n4B", 10.0, "#FCF3CF"),
+        ("width\n2B", 12.2, "#FCF3CF"), ("height\n2B", 13.5, "#FCF3CF"), ("fourcc\n4B", 15.0, "#FCF3CF"),
+        ("stride\n4B", 17.2, "#FCF3CF"), ("payload_len\n4B", 19.5, "#FCF3CF"), ("checksum\n4B", 21.8, "#AED6F1"),
     ]
-    for txt, x, c in v1_fields:
-        box(ax1, x, 3.5, 1.5, 1.8, txt, color=c, fontsize=8, bold=True, lw=0.5)
-    # 图像载荷
-    r1 = FancyBboxPatch((21.2, 3.8), 5, 1.2, boxstyle="round,pad=0.05",
+    for txt, x, c in v1:
+        box(ax1, x, 3.8, 1.8, 1.6, txt, color=c, fontsize=10, bold=True, lw=0.6)
+    # 分隔线 + 载荷/拖车标注
+    ax1.axvline(x=24.2, ymin=0.2, ymax=0.85, color="#555", lw=1.5, linestyle="dotted")
+    r1 = FancyBboxPatch((24.8, 4.0), 2.5, 1.2, boxstyle="round,pad=0.05",
                          facecolor="#D5F5E3", edgecolor="#888", linewidth=0.8)
-    ax1.add_patch(r1); ax1.text(23.7, 4.4, "RGB565\n图像载荷", ha="center", fontsize=10, weight="bold")
-    # JSON拖车
-    r2 = FancyBboxPatch((21.2, 2.3), 5, 1.2, boxstyle="round,pad=0.05",
+    ax1.add_patch(r1); ax1.text(26.05, 4.6, "RGB565\n载荷", ha="center", fontsize=11, weight="bold")
+    r2 = FancyBboxPatch((24.8, 2.4), 2.5, 1.2, boxstyle="round,pad=0.05",
                          facecolor="#E8DAEF", edgecolor="#888", linewidth=0.8, linestyle="dashed")
-    ax1.add_patch(r2); ax1.text(23.7, 2.9, "JSON拖车\n(flags bit0=1)", ha="center", fontsize=9, color="#7D3C98")
-    ax1.text(0.3, 2.0, "帧头32B →", fontsize=10, color="#555", style="italic")
-    ax1.axvline(x=21.0, ymin=0.15, ymax=0.85, color="#888", lw=1, linestyle="dotted")
+    ax1.add_patch(r2)
+    ax1.text(26.05, 3.0, "JSON\n拖车", ha="center", fontsize=10, color="#7D3C98", weight="bold")
+    ax1.text(24.5, 1.8, "(flags bit0=1时存在)", ha="center", fontsize=9, color="#7D3C98", style="italic")
+    ax1.text(0.5, 2.5, "← 帧头 32B", fontsize=11, color="#555", style="italic")
 
-    # === v2 ===
-    ax2.set_xlim(0, 20); ax2.set_ylim(0, 6); ax2.axis("off")
-    ax2.set_title("EVTF v2 帧结构（52字节扩展帧头 + JPEG图像载荷 + JSON边车）", fontsize=15, weight="bold", pad=8, color="#1A5276")
+    # === v2: two rows of fields ===
+    ax2.set_xlim(0, 28); ax2.set_ylim(0, 8); ax2.axis("off")
+    ax2.set_title("EVTF v2 帧结构（52字节扩展帧头 + JPEG图像载荷 + JSON边车）",
+                  fontsize=16, weight="bold", pad=10, color="#1A5276")
 
-    v2_fields = [
-        ("magic\n4B", 0.3, "#FCF3CF"), ("version\n2B", 2.0, "#FCF3CF"), ("hdr_size\n2B", 3.2, "#FCF3CF"),
-        ("flags\n4B", 4.5, "#AED6F1"), ("src_frame\n4B", 6.5, "#FCF3CF"), ("image_id\n4B", 8.5, "#D5F5E3"),
-        ("event_id\n4B", 10.5, "#D5F5E3"), ("timestamp\n4B", 12.5, "#FCF3CF"),
-        ("src_w\n2B", 0.3, "#FCF3CF"), ("src_h\n2B", 1.5, "#FCF3CF"), ("src_fourcc\n4B", 2.8, "#FCF3CF"),
-        ("img_w\n2B", 4.6, "#FCF3CF"), ("img_h\n2B", 5.8, "#FCF3CF"),
-        ("fmt\n2B", 7.0, "#AED6F1"), ("role\n2B", 8.2, "#AED6F1"),
-        ("img_bytes\n4B", 9.5, "#D5F5E3"), ("side_bytes\n4B", 11.5, "#E8DAEF"),
-        ("img_csum\n4B", 13.5, "#AED6F1"), ("side_csum\n4B", 15.5, "#AED6F1"),
+    # Row 1: first 8 fields (v1-compatible portion)
+    v2_r1 = [
+        ("magic\n4B", 0.5, "#FCF3CF"), ("version\n2B", 2.5, "#FCF3CF"), ("hdr_size\n2B", 4.0, "#FCF3CF"),
+        ("flags\n4B", 5.7, "#AED6F1"), ("src_frame\n4B", 7.8, "#FCF3CF"), ("image_id\n4B", 10.0, "#D5F5E3"),
+        ("event_id\n4B", 12.2, "#D5F5E3"), ("timestamp\n4B", 14.5, "#FCF3CF"),
     ]
-    for txt, x, c in v2_fields:
-        y = 3.5 if x < 14 else 3.5  # all on one row for v2
-        box(ax2, x, 3.3, 1.5, 2.0, txt, color=c, fontsize=7.5, bold=True, lw=0.5)
+    for txt, x, c in v2_r1:
+        box(ax2, x, 5.5, 1.8, 1.4, txt, color=c, fontsize=10, bold=True, lw=0.6)
 
-    # JPEG载荷
-    r3 = FancyBboxPatch((17.5, 3.8), 4, 1.2, boxstyle="round,pad=0.05",
+    # Row 2: remaining 10 fields (v2 extensions)
+    v2_r2 = [
+        ("src_w\n2B", 0.5, "#FCF3CF"), ("src_h\n2B", 1.8, "#FCF3CF"), ("src_fourcc\n4B", 3.2, "#FCF3CF"),
+        ("img_w\n2B", 5.5, "#FCF3CF"), ("img_h\n2B", 6.8, "#FCF3CF"),
+        ("fmt\n2B", 8.2, "#AED6F1"), ("role\n2B", 9.5, "#AED6F1"),
+        ("img_bytes\n4B", 11.0, "#D5F5E3"), ("side_bytes\n4B", 13.3, "#E8DAEF"),
+        ("img_csum\n4B", 15.6, "#AED6F1"), ("side_csum\n4B", 18.0, "#AED6F1"),
+    ]
+    for txt, x, c in v2_r2:
+        box(ax2, x, 3.0, 1.8, 1.4, txt, color=c, fontsize=9, bold=True, lw=0.6)
+
+    # 分隔线 + JPEG/Sidecar
+    ax2.axvline(x=20.5, ymin=0.15, ymax=0.9, color="#555", lw=1.5, linestyle="dotted")
+    r3 = FancyBboxPatch((21.0, 5.6), 3.0, 1.2, boxstyle="round,pad=0.05",
                          facecolor="#D5F5E3", edgecolor="#888", linewidth=0.8)
-    ax2.add_patch(r3); ax2.text(19.5, 4.4, "JPEG\n图像载荷", ha="center", fontsize=10, weight="bold")
-    # JSON边车
-    r4 = FancyBboxPatch((17.5, 2.3), 4, 1.2, boxstyle="round,pad=0.05",
+    ax2.add_patch(r3); ax2.text(22.5, 6.2, "JPEG载荷", ha="center", fontsize=11, weight="bold")
+    r4 = FancyBboxPatch((21.0, 3.0), 3.0, 1.2, boxstyle="round,pad=0.05",
                          facecolor="#E8DAEF", edgecolor="#888", linewidth=0.8, linestyle="dashed")
-    ax2.add_patch(r4); ax2.text(19.5, 2.9, "JSON边车\n(sidecar)", ha="center", fontsize=9, color="#7D3C98")
-    ax2.axvline(x=17.0, ymin=0.15, ymax=0.85, color="#888", lw=1, linestyle="dotted")
+    ax2.add_patch(r4)
+    ax2.text(22.5, 3.6, "JSON边车", ha="center", fontsize=10, color="#7D3C98", weight="bold")
+
+    ax2.text(0.5, 1.2, "← 帧头 52B (Row1: 24B + Row2: 28B)", fontsize=11, color="#555", style="italic")
 
     # 图例
-    ax2.text(0.3, 1.0, "图例：", fontsize=10, weight="bold")
-    for label, x, c in [("固定帧头字段", 3.0, "#FCF3CF"), ("校验/标志字段", 6.5, "#AED6F1"),
-                          ("v2新增字段", 10.5, "#D5F5E3"), ("JSON/元数据", 14.0, "#E8DAEF")]:
-        box(ax2, x, 0.5, 1.8, 0.6, "", color=c, fontsize=6, lw=0.3)
-        ax2.text(x+2.0, 0.8, label, fontsize=9, va="center", color="#555")
+    for i, (label, x, c) in enumerate([("固定帧头字段", 0.8, "#FCF3CF"), ("校验/标志字段", 5.5, "#AED6F1"),
+                          ("v2新增字段", 10.5, "#D5F5E3"), ("JSON/元数据", 15.5, "#E8DAEF")]):
+        box(ax2, x, 0.3, 2.2, 0.6, "", color=c, fontsize=6, lw=0.3)
+        ax2.text(x+2.5, 0.6, label, fontsize=10, va="center", color="#555")
 
     save(fig, "fig_9_11.png")
 
